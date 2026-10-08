@@ -1,0 +1,298 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Scope Lock — agree the job before it starts</title>
+<meta name="description" content="A freelancer and a client agree what's included, what isn't and the price, then lock a fingerprint of that agreement on the BSV blockchain. No more “I thought that was included”.">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='12' y='28' width='40' height='30' rx='7' fill='%232D4BD8'/%3E%3Cpath d='M21 28v-7a11 11 0 0122 0v7' fill='none' stroke='%232D4BD8' stroke-width='6'/%3E%3C/svg%3E">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="top">
+  <div class="brand">
+    <svg class="logo" viewBox="0 0 64 64" aria-hidden="true"><rect x="10" y="27" width="44" height="32" rx="8" fill="currentColor"/><path d="M20 27v-6a12 12 0 0124 0v6" fill="none" stroke="currentColor" stroke-width="5.5" stroke-linecap="round"/><path d="M23 43.5l6 6 12-13" fill="none" stroke="#fff" stroke-width="4.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    <div>
+      <div class="wordmark">Scope Lock</div>
+      <div class="tagline">Agree the job before it starts.</div>
+    </div>
+  </div>
+  <nav class="tabs" role="tablist">
+    <button role="tab" class="tab active" data-tab="agree" aria-selected="true">Agree</button>
+    <button role="tab" class="tab" data-tab="verify">Verify</button>
+    <button role="tab" class="tab" data-tab="key">Key &amp; funds <span id="netBadge" class="badge">MAIN</span></button>
+  </nav>
+</header>
+
+<main>
+  <!-- ======================= AGREE ======================= -->
+  <section id="tab-agree" class="panel active" role="tabpanel">
+    <div class="notice hidden" id="linkBanner"></div>
+    <div class="grid wide">
+      <div class="col-main">
+
+        <!-- 1. The job -->
+        <div class="card" id="termsCard">
+          <div class="card-head">
+            <h2><span class="stepno">1</span> The job</h2>
+            <button class="ghost small" id="newAgreement" title="Start a blank agreement">New agreement</button>
+          </div>
+          <div class="locknote hidden" id="termsLocked">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2.5" fill="currentColor"/><path d="M8 11V8a4 4 0 018 0v3" fill="none" stroke="currentColor" stroke-width="2"/></svg>
+            <div>Someone has agreed to these terms, so they're locked for editing. Read them in the summary. <button class="linkish" id="editTerms">Change the terms</button> (this clears both confirmations).</div>
+          </div>
+          <div class="field">
+            <label for="job">Job title</label>
+            <input id="job" type="text" maxlength="140" placeholder="e.g. Brand identity for Hearth Bakery" autocomplete="off">
+          </div>
+          <div class="two">
+            <div class="field"><label for="client">Client name</label><input id="client" type="text" maxlength="80" placeholder="e.g. Sam Patel" autocomplete="off"></div>
+            <div class="field"><label for="freelancer">Your name</label><input id="freelancer" type="text" maxlength="80" placeholder="e.g. Jo Adams" autocomplete="name"></div>
+          </div>
+          <div class="two">
+            <div class="field"><label for="price">Price <span class="hint">GBP, the total for this scope</span></label><div class="prefix"><span>£</span><input id="price" type="text" inputmode="decimal" placeholder="1,250" autocomplete="off"></div></div>
+            <div class="field"><label for="start">Work starts</label><input id="start" type="date"></div>
+          </div>
+          <div class="field">
+            <label for="included">What's included <span class="hint">one item per line</span></label>
+            <textarea id="included" rows="5" placeholder="Logo: 3 initial concepts&#10;2 rounds of revisions on the chosen concept&#10;Colour palette and font pairing&#10;One-page brand guide (PDF)"></textarea>
+          </div>
+          <div class="field">
+            <label for="excluded">What's <u>not</u> included <span class="hint">one item per line · this is the part that prevents arguments</span></label>
+            <textarea id="excluded" rows="4" placeholder="Website design or build&#10;Printing costs&#10;Extra revision rounds (£60 per round)&#10;Social media templates"></textarea>
+          </div>
+          <div class="muted small-text" id="missingLine"></div>
+        </div>
+
+        <!-- 3. Agree -->
+        <div class="card" id="agreeCard">
+          <div class="card-head"><h2><span class="stepno">3</span> Both agree</h2></div>
+          <p class="muted">Each person types their name and confirms. Do it together on one phone, or on two. The name you type and the exact time are written into the agreement.</p>
+          <div class="parties">
+            <div class="party" id="partyFreelancer" data-role="freelancer">
+              <div class="party-role">Freelancer</div>
+              <div class="party-pending">
+                <input class="party-name" type="text" maxlength="80" placeholder="Type your full name" autocomplete="off">
+                <label class="check"><input type="checkbox" class="party-tick"> I've read the summary and I agree to this scope</label>
+                <button class="primary party-btn" disabled>I agree, I'm the freelancer</button>
+              </div>
+              <div class="party-done hidden">
+                <div class="signed"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="signed-name"></span></div>
+                <div class="muted small-text party-time"></div>
+                <button class="linkish party-undo">Undo</button>
+              </div>
+            </div>
+            <div class="party" id="partyClient" data-role="client">
+              <div class="party-role">Client</div>
+              <div class="party-pending">
+                <input class="party-name" type="text" maxlength="80" placeholder="Type your full name" autocomplete="off">
+                <label class="check"><input type="checkbox" class="party-tick"> I've read the summary and I agree to this scope</label>
+                <button class="primary party-btn" disabled>I agree, I'm the client</button>
+              </div>
+              <div class="party-done hidden">
+                <div class="signed"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="11" fill="currentColor"/><path d="M7 12.5l3.2 3.2L17 9" stroke="#fff" stroke-width="2.4" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg><span class="signed-name"></span></div>
+                <div class="muted small-text party-time"></div>
+                <button class="linkish party-undo">Undo</button>
+              </div>
+            </div>
+          </div>
+          <div class="sharebox" id="shareBox">
+            <div class="share-head">
+              <div>
+                <div class="share-title" id="shareTitle">Other person not with you?</div>
+                <div class="muted small-text" id="shareSub">Send them a link to read the scope and add their confirmation. The whole agreement travels inside the link, so nothing is stored on a server.</div>
+              </div>
+              <button class="ghost" id="makeLink">Create link</button>
+            </div>
+            <div class="share-link hidden" id="shareLinkRow">
+              <input id="shareLink" type="text" readonly spellcheck="false">
+              <div class="row-btns tight">
+                <button class="ghost small" id="copyLink">Copy link</button>
+                <button class="ghost small hidden" id="nativeShare">Share…</button>
+                <a class="ghost small btnlink" id="emailLink" target="_blank" rel="noopener">Email</a>
+                <a class="ghost small btnlink" id="waLink" target="_blank" rel="noopener">WhatsApp</a>
+              </div>
+              <div class="muted small-text">Anyone with this link can read the agreement, so only send it to the other person.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 4. Lock -->
+        <div class="card" id="lockCard">
+          <div class="card-head"><h2><span class="stepno">4</span> Lock it</h2><span class="pill" id="lockWho">Not ready</span></div>
+          <p class="muted" id="lockExplain">Locking writes a fingerprint of the full agreement (including both names and confirmation times) to the BSV blockchain. The agreement itself stays private. Only the fingerprint and the short title below are public.</p>
+          <div class="field">
+            <label for="pubTitle">Public title <span class="hint">visible to anyone, forever · keep names and prices out of it</span></label>
+            <input id="pubTitle" type="text" maxlength="120" placeholder="Scope agreed · SL-XXXX">
+          </div>
+          <div class="actions">
+            <button class="primary big" id="lockBtn" disabled><svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2.5" fill="currentColor"/><path d="M8 11V8a4 4 0 018 0v3" fill="none" stroke="currentColor" stroke-width="2.2"/></svg><span>Lock it on BSV</span></button>
+            <div class="cost" id="costLine">Cost ≈ 31 sats (about 0.0004p) network fee</div>
+          </div>
+          <div class="notice hidden" id="lockStatus"></div>
+          <div class="result hidden" id="lockResult">
+            <div class="result-head">
+              <div class="seal"><svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="28" fill="none" stroke="currentColor" stroke-width="4" stroke-dasharray="4 3"/><rect x="20" y="29" width="24" height="18" rx="4" fill="currentColor"/><path d="M25 29v-4a7 7 0 0114 0v4" fill="none" stroke="currentColor" stroke-width="3.5"/></svg></div>
+              <div>
+                <div class="result-title">Locked.</div>
+                <div class="result-sub">The fingerprint is on the BSV blockchain. It will be sealed into a block in about 10 minutes.</div>
+              </div>
+            </div>
+            <dl class="kv" id="lockKv"></dl>
+            <div class="row-btns">
+              <a class="primary btnlink" id="explorerLink" target="_blank" rel="noopener">View on WhatsOnChain ↗</a>
+              <button class="ghost" id="copyLockedLink">Copy link to the locked agreement</button>
+            </div>
+          </div>
+          <div class="row-btns">
+            <button class="ghost" id="printBtn">Print one-page summary</button>
+            <button class="ghost" id="downloadTxt">Download agreement text (.txt)</button>
+            <button class="ghost" id="copyTxt">Copy agreement text</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Summary -->
+      <aside class="col-side">
+        <div class="sticky">
+          <div class="side-label"><span class="stepno">2</span> Summary <span class="hint">what both of you are agreeing to</span></div>
+          <article class="doc" id="summary" aria-live="polite"></article>
+          <div class="fp">
+            <div class="label">Fingerprint (SHA-256) <span class="hint">changes if a single character changes</span></div>
+            <code class="hash small-hash" id="fingerprint">—</code>
+          </div>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ======================= VERIFY ======================= -->
+  <section id="tab-verify" class="panel" role="tabpanel">
+    <div class="grid">
+      <div class="col-main">
+        <div class="card">
+          <h2>Check an agreement</h2>
+          <p class="muted">Paste the agreement text (or open the .txt file, or open the share link), add the transaction ID, and we'll check whether this exact agreement was locked.</p>
+          <div class="field">
+            <label for="vText">Agreement text <span class="hint"><label class="linkish filelabel">open a .txt file<input type="file" id="vFile" accept=".txt,text/plain" hidden></label></span></label>
+            <textarea id="vText" rows="12" class="mono-area" spellcheck="false" placeholder="SCOPE LOCK - AGREED SCOPE OF WORK&#10;Format: scope-lock/1&#10;Reference: SL-…"></textarea>
+          </div>
+          <div class="hashblock">
+            <div class="label">Fingerprint of this text</div>
+            <code class="hash" id="vHash">—</code>
+          </div>
+          <div class="field">
+            <label for="txid">Transaction ID (txid)</label>
+            <input id="txid" type="text" spellcheck="false" autocomplete="off" placeholder="64-character transaction ID">
+          </div>
+          <div class="actions">
+            <button class="primary big" id="verifyBtn" disabled>Verify</button>
+            <label class="inline"><input type="checkbox" id="verifyTestnet"> testnet transaction</label>
+          </div>
+          <div class="verdict hidden" id="verdict"></div>
+        </div>
+      </div>
+      <aside class="col-side">
+        <div class="side-card">
+          <div class="side-title">What a match proves</div>
+          <p>If the fingerprints match, this exact agreement text, including both names and confirmation times, existed no later than the <b>block time</b> of that transaction. The BSV network sets the block time, so it can't be back-dated.</p>
+          <p class="muted">Change one character, such as a price, a comma or a name, and the fingerprint won't match. Line endings and trailing spaces are ignored, so copying between apps is safe.</p>
+        </div>
+        <div class="side-card">
+          <div class="side-title">Check it without this site</div>
+          <p class="muted">Save the agreement text as a UTF-8 file with no final newline and run <span class="mono">shasum -a 256</span> on it. Then compare the result with the 32 bytes after “SCOPELOCK” “1” in the transaction's OP_RETURN output on any BSV explorer.</p>
+        </div>
+      </aside>
+    </div>
+  </section>
+
+  <!-- ======================= KEY ======================= -->
+  <section id="tab-key" class="panel" role="tabpanel">
+    <div class="grid">
+      <div class="col-main">
+        <div class="card">
+          <div class="card-head">
+            <h2>Locking key</h2>
+            <div class="seg" role="group" aria-label="Network">
+              <button class="segbtn active" data-net="main">Mainnet</button>
+              <button class="segbtn" data-net="test">Testnet</button>
+            </div>
+          </div>
+          <p class="muted">A small, separate key that lives only in this browser and pays the network fee for each lock. It is not your Proof of Design key and not your wallet. <b>Never send your main savings here</b>. A few pence of BSV covers thousands of locks.</p>
+
+          <div id="noKey">
+            <button class="primary" id="createKey">Create locking key</button>
+            <button class="ghost" id="importKey">Import a backup (WIF)</button>
+          </div>
+
+          <div id="hasKey" class="hidden">
+            <div class="fund">
+              <div class="qr" id="qr"></div>
+              <div class="fund-info">
+                <div class="label">Send BSV to this address to fund locking</div>
+                <code class="addr" id="address">—</code>
+                <div class="row-btns tight">
+                  <button class="ghost small" id="copyAddr">Copy address</button>
+                  <button class="ghost small" id="refreshBal">Refresh balance</button>
+                </div>
+                <div class="balance"><span id="balSats">—</span> <span class="muted" id="balFiat"></span></div>
+                <div class="muted small-text" id="balLocks"></div>
+              </div>
+            </div>
+            <div class="warn">
+              <b>Back it up.</b> This key exists only in this browser. Clearing your browser data deletes it, along with any BSV on it. Download a backup and keep it somewhere safe. Anyone with the backup can spend the funds on it.
+            </div>
+            <div class="row-btns">
+              <button class="primary" id="backupKey">Download backup</button>
+              <button class="ghost" id="withdrawBtn">Withdraw all to my wallet</button>
+              <button class="ghost danger" id="deleteKey">Remove key from this browser</button>
+            </div>
+          </div>
+          <div class="notice hidden" id="keyStatus"></div>
+        </div>
+      </div>
+      <aside class="col-side">
+        <div class="side-card">
+          <div class="side-title">How much to put on it?</div>
+          <p>Each lock costs about <b id="feeSats">31</b> satoshis in network fees<span id="feeFiat"></span>.</p>
+          <p><b>100,000 sats</b> (0.001 BSV) covers about 3,000 locks and is worth about <b id="fund100k">1–2p</b>.</p>
+          <p class="muted">Send from any BSV wallet, such as HandCash, Yours, RockWallet or an exchange. Only send BSV, not BTC or BCH.</p>
+        </div>
+        <div class="side-card">
+          <div class="side-title">Privacy</div>
+          <p class="muted">Agreements are kept in this browser and in the links you choose to send. They are never uploaded. Only the fingerprint, the public title and the lock time go on the blockchain. Balance lookups and broadcasts go to WhatsOnChain and GorillaPool ARC.</p>
+        </div>
+        <div class="side-card">
+          <div class="side-title">Your locks <span class="hint">on this device</span></div>
+          <ul class="history" id="history"><li class="muted">No locks yet.</li></ul>
+        </div>
+      </aside>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <span>Scope Lock v1 · open-source static page · not legal advice. A lock proves this exact agreement text, with the names typed in it, existed at a certain time. It is not a signed contract or proof of identity.</span>
+</footer>
+
+<div class="modal hidden" id="modal">
+  <div class="modal-card">
+    <div class="modal-title" id="modalTitle"></div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="row-btns end">
+      <button class="ghost" id="modalCancel">Cancel</button>
+      <button class="primary" id="modalOk">OK</button>
+    </div>
+  </div>
+</div>
+
+<script src="vendor/bsv-sdk.min.js"></script>
+<script src="vendor/qrcode.js"></script>
+<script src="js/config.js"></script>
+<script src="js/agreement.js"></script>
+<script src="js/core.js"></script>
+<script src="js/print.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
